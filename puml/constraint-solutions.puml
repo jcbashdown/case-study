@@ -1,40 +1,58 @@
 @startuml
 skinparam componentStyle uml2
-
-package "System Entities" {
-  component LocalServer {
-    component ServerDatabase
-    component ServerApplication
-  }
-
-  component MobileDevice {
-    component MobileApp
-  }
-
-  LocalServer -right-> MobileDevice : communicates
+package "Local Server" as LocalServer {
+  component "App Server"
+  component Database
 }
 
-package "Constraints" {
-  component "Operates Offline"{
+package MobileDevice {
+  component "Installed Progressive Web App" {
+    component Functionality {
+      component "Patient Enrollment" {
+        component "Patient Identification"
+      }
+      component "Health Record System"
+      component "Patient Processing System for stages of care"
+    }
+    component Implementation {
+      component "PWA UI" as UI
+      note right of UI
+                Likely a cached SPA with client routing.
+                Any browser supporting service workers should also support this.
+                Pages should be as simple as possible - largely static - 
+                to not require significant CPU or memory resources on the device.
+                Strict client side validation should be implemented.
+                All data should be written to a local db such as RxDB and synced when possible.
+      end note
+      component "On Device DB"
+      component "Syncing system with service workers and sockets/api/long polling"
+    }
+  }
+  component "Mobile Dashboard" {
+
   }
 
-  component "Data is shared between the team in real time "{
-  }
+}
+package "Dashboard Display" {
+  component "Full Screen Dashboard" {
 
-  component "Data must be secure and only accessible by approved individuals"{
   }
 }
 
-LocalServer ..> OperatesOffline
-LocalServer ..> RealTimeDataSharing
-LocalServer ..> DataSecurity
+component "Dashboard" {
+  component "Local Data"
+  component "Syncing System"
+  component "Data Display" {
+    component "Patient number"
+    component "Patient illnesses"
+    component "In-patient treatment duration"
+    component "Bed occupation rate"
+    component "Last sync"
+    component "Sync error message with suggested action"
+  }
+}
 
-MobileDevice ..> OperatesOffline
-MobileDevice ..> MultiPlatformSupport
-MobileDevice ..> UserInterfaceUsability
-MobileDevice ..> DataSecurity
-
-note right of LocalServer
+note left of LocalServer
   - Hosts server application and database
   - Connects to mobile devices via local WiFi
   - Supports real-time data sharing
@@ -42,11 +60,5 @@ note right of LocalServer
   - Has synchronization capabilities
 end note
 
-note right of MobileDevice
-  - Runs mobile app
-  - Supports offline data collection
-  - Synchronizes with server database
-  - Ensures interface usability
-  - Maintains data security standards
-end note
+
 @enduml
