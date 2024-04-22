@@ -1,0 +1,59 @@
+@startuml
+entity "Patient" as Patient {
+    + patient_id : int
+    + name : string
+    + biometric_data : string
+    + contact_info : string
+    + health_history : string
+}
+
+entity "Services" as Services {
+    + service_id : int
+    + type : string
+    + description : string
+}
+
+entity "Staff" as Staff {
+    + staff_id : int
+    + name : string
+    + qualifications : string
+    + role : string
+}
+
+entity "Health Center" as HealthCenter {
+    + center_id : int
+    + location : string
+    + capacity : int
+    + operational_status : string
+}
+
+entity "Visit" as Visit {
+    + visit_id : int
+    + patient_id : int
+    + date : date
+    + time : time
+    + services_provided : string
+}
+
+entity "Treatment" as Treatment {
+    + treatment_id : int
+    + description : string
+    + service_id : int
+}
+
+entity "Triage" as Triage {
+    + triage_id : int
+    + patient_id : int
+    + urgency_level : string
+    + findings : string
+}
+
+Patient ||--o{ Visit : "has many"
+Visit ||--|{ Services : "requires one or many"
+Staff }|--o{ Visit : "conducts many"
+Visit ||--o{ Treatment : "receives many"
+Patient }o--|| Triage : "undergoes one"
+Services }|--o{ Treatment : "involves many"
+HealthCenter ||--o{ Visit : "hosts many"
+
+@enduml
