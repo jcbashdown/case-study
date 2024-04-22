@@ -71,5 +71,12 @@ note left of LocalServer
   - Has synchronization capabilities
 end note
 
+note bottom of Dashboard 
+  Gets the latest data on first load
+  Syncs in the background periodically
+  Displays the last data and sync time
+  Indicates when sync is consistently failing
+  Optional auth to see this dashboard
+end note
 
 @enduml
