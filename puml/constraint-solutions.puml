@@ -1,0 +1,52 @@
+@startuml
+skinparam componentStyle uml2
+
+package "System Entities" {
+  component LocalServer {
+    component ServerDatabase
+    component ServerApplication
+  }
+
+  component MobileDevice {
+    component MobileApp
+  }
+
+  LocalServer -right-> MobileDevice : communicates
+}
+
+package "Constraints" {
+  component "Operates Offline"{
+  }
+
+  component "Data is shared between the team in real time "{
+  }
+
+  component "Data must be secure and only accessible by approved individuals"{
+  }
+}
+
+LocalServer ..> OperatesOffline
+LocalServer ..> RealTimeDataSharing
+LocalServer ..> DataSecurity
+
+MobileDevice ..> OperatesOffline
+MobileDevice ..> MultiPlatformSupport
+MobileDevice ..> UserInterfaceUsability
+MobileDevice ..> DataSecurity
+
+note right of LocalServer
+  - Hosts server application and database
+  - Connects to mobile devices via local WiFi
+  - Supports real-time data sharing
+  - Operates offline
+  - Has synchronization capabilities
+end note
+
+note right of MobileDevice
+  - Runs mobile app
+  - Supports offline data collection
+  - Synchronizes with server database
+  - Ensures interface usability
+  - Maintains data security standards
+end note
+@enduml
