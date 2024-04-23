@@ -1,7 +1,7 @@
 @startuml
 left to right direction
 skinparam componentStyle uml2
-skinparam packagestyle rectangle 
+skinparam packagestyle uml2 
 
 together {
   component Dashboard {
@@ -66,9 +66,9 @@ component "Patient Management Progressive Web App" as PWA {
   }
   package Implementation {
     together {
-      component "Syncing system"
+      component "Syncing system" as SyncingSystem
       component "PWA UI" as UI
-      component "On Device DB"
+      component "On Device DB" as OnDeviceDB
     }
   }
   note top of Implementation 
@@ -92,6 +92,9 @@ Implementation -[hidden]up-> Functionality
 FSDashboard -down-> Dashboard
 MobileDashboard -down-> Dashboard
 InstalledPWA -up-> PWA
+
+UI <-> OnDeviceDB 
+OnDeviceDB <-> SyncingSystem
 
 
 @enduml
