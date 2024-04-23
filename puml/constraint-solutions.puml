@@ -25,28 +25,34 @@ together {
   end note
 }
 together {
-  package "Local Server" as LocalServer {
-    component "App Server"
-    component Database
-  }
-  package MobileDevice {
-    component "Mobile Dashboard" as MobileDashboard {
+  package LAN {
+    package "Network Devices" as Network {
+      component Router
+      component "WiFi Boosters" as WiFiBoosters
     }
-    component "Installed Patient Management Progressive Web App" as InstalledPWA {
+    package "Local Server" as LocalServer {
+      component "App Server"
+      component Database
     }
-  }
-  package "Dashboard Display" as DashboardDisplay {
-    component "Full Screen Dashboard" as FSDashboard {
+    package MobileDevice {
+      component "Mobile Dashboard" as MobileDashboard {
+      }
+      component "Installed Patient Management Progressive Web App" as InstalledPWA {
+      }
+    }
+    package "Dashboard Display" as DashboardDisplay {
+      component "Full Screen Dashboard" as FSDashboard {
 
+      }
     }
+    note left of LocalServer
+      - Hosts server application and database
+      - Connects to mobile devices via local WiFi
+      - Supports real-time data sharing
+      - Operates offline
+      - Has synchronization capabilities
+    end note
   }
-  note bottom of LocalServer
-    - Hosts server application and database
-    - Connects to mobile devices via local WiFi
-    - Supports real-time data sharing
-    - Operates offline
-    - Has synchronization capabilities
-  end note
 
 }
 
@@ -65,7 +71,7 @@ component "Patient Management Progressive Web App" as PWA {
       component "On Device DB"
     }
   }
-  note right of Implementation 
+  note top of Implementation 
             Likely a cached SPA with client routing.
             Any browser supporting service workers should also support this.
             Pages should be as simple as possible - largely static - 
@@ -75,14 +81,17 @@ component "Patient Management Progressive Web App" as PWA {
   end note
 }
 
-LocalServer <--> MobileDevice : syncs 
-LocalServer <--> DashboardDisplay : syncs
+
+Router <--> WiFiBoosters
+LocalServer <--> Network: Syncs through network 
+MobileDevice <--> Network: Syncs through network 
+DashboardDisplay <--> Network: Syncs through network 
 
 Implementation -[hidden]up-> Functionality
 
-FSDashboard <-down-> Dashboard
-MobileDashboard <-down-> Dashboard
-InstalledPWA <-up-> PWA
+FSDashboard -down-> Dashboard
+MobileDashboard -down-> Dashboard
+InstalledPWA -up-> PWA
 
 
 @enduml
