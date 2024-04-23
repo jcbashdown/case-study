@@ -1,82 +1,88 @@
 @startuml
+left to right direction
 skinparam componentStyle uml2
-package "Local Server" as LocalServer {
-  component "App Server"
-  component Database
+skinparam packagestyle rectangle 
+
+together {
+  component Dashboard {
+    component "Local Data"
+    component "Syncing System"
+    component "Data Display" {
+      component "Patient number"
+      component "Patient illnesses"
+      component "In-patient treatment duration"
+      component "Bed occupation rate"
+      component "Last sync"
+      component "Sync error message with suggested action"
+    }
+  }
+  note bottom of Dashboard 
+    Gets the latest data on first load
+    Syncs in the background periodically
+    Displays the last data and sync time
+    Indicates when sync is consistently failing
+    Optional auth to see this dashboard
+  end note
+}
+together {
+  package "Local Server" as LocalServer {
+    component "App Server"
+    component Database
+  }
+  package MobileDevice {
+    component "Mobile Dashboard" as MobileDashboard {
+    }
+    component "Installed Patient Management Progressive Web App" as InstalledPWA {
+    }
+  }
+  package "Dashboard Display" as DashboardDisplay {
+    component "Full Screen Dashboard" as FSDashboard {
+
+    }
+  }
+  note bottom of LocalServer
+    - Hosts server application and database
+    - Connects to mobile devices via local WiFi
+    - Supports real-time data sharing
+    - Operates offline
+    - Has synchronization capabilities
+  end note
+
 }
 
-package MobileDevice {
-  component "Mobile Dashboard" as MobileDashboard {
-  }
-  component "Installed Patient Management Progressive Web App" as InstalledPWA {
-  }
-}
-package "Dashboard Display" as DashboardDisplay {
-  component "Full Screen Dashboard" as FSDashboard {
-
-  }
-}
-
-component Dashboard {
-  component "Local Data"
-  component "Syncing System"
-  component "Data Display" {
-    component "Patient number"
-    component "Patient illnesses"
-    component "In-patient treatment duration"
-    component "Bed occupation rate"
-    component "Last sync"
-    component "Sync error message with suggested action"
-  }
-}
 component "Patient Management Progressive Web App" as PWA {
-  component Functionality {
+  package Functionality {
     component "Patient Enrollment" {
       component "Patient Identification"
     }
     component "Health Record System"
     component "Patient Processing System for stages of care"
   }
-  component Implementation {
-    component "PWA UI" as UI
-    component "On Device DB"
-    component "Syncing system with service workers and sockets/api/long polling"
+  package Implementation {
+    together {
+      component "Syncing system"
+      component "PWA UI" as UI
+      component "On Device DB"
+    }
   }
-    note right of Implementation 
-              Likely a cached SPA with client routing.
-              Any browser supporting service workers should also support this.
-              Pages should be as simple as possible - largely static - 
-              to not require significant CPU or memory resources on the device.
-              Strict client side validation should be implemented.
-              All data should be written to a local db such as RxDB and synced when possible.
-    end note
+  note right of Implementation 
+            Likely a cached SPA with client routing.
+            Any browser supporting service workers should also support this.
+            Pages should be as simple as possible - largely static - 
+            to not require significant CPU or memory resources on the device.
+            Strict client side validation should be implemented.
+            All data should be written to a local db such as RxDB and synced when possible.
+  end note
 }
 
-LocalServer -down-> MobileDevice : syncs 
-LocalServer -down-> DashboardDisplay : syncs
-MobileDevice -up-> LocalServer : syncs
-DashboardDisplay -up-> LocalServer : syncs
+LocalServer <--> MobileDevice : syncs 
+LocalServer <--> DashboardDisplay : syncs
 
 Implementation -[hidden]up-> Functionality
 
-MobileDashboard --> Dashboard
-FSDashboard --> Dashboard
-InstalledPWA --> PWA
+FSDashboard <-down-> Dashboard
+MobileDashboard <-down-> Dashboard
+InstalledPWA <-up-> PWA
 
-note left of LocalServer
-  - Hosts server application and database
-  - Connects to mobile devices via local WiFi
-  - Supports real-time data sharing
-  - Operates offline
-  - Has synchronization capabilities
-end note
-
-note bottom of Dashboard 
-  Gets the latest data on first load
-  Syncs in the background periodically
-  Displays the last data and sync time
-  Indicates when sync is consistently failing
-  Optional auth to see this dashboard
-end note
 
 @enduml
