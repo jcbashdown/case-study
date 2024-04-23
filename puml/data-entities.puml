@@ -26,7 +26,15 @@ entity "Patient Media" as PatientMedia {
 entity "Treatment" as Treatment{
     + id : uuid 
     + patient_id: uuid 
+    + treatment_template_id: uuid 
+    + description : string
+    + created_at: datetime 
+    + updated_at: datetime 
+}
+entity "Treatment Template" as TreatmentTemplate{
+    + id : uuid 
     + type : TreatmentEnum 
+    + name: string
     + description : string
     + created_at: datetime 
     + updated_at: datetime 
@@ -150,5 +158,6 @@ Triage ||--|{ TriageQuestionnaire: "uses one"
 TriageQuestionnaire ||--o{ QuestionnaireQuestion : "has many"
 TriageQuestionnaire ||--o{ QuestionnaireAnswer: "has many"
 QuestionnaireAnswer ||--|{ QuestionnaireQuestion : "answers one"
+Treatment ||--|{ TreatmentTemplate: "has one"
 
 @enduml
