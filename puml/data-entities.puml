@@ -1,59 +1,203 @@
 @startuml
-entity "Patient" as Patient {
-    + patient_id : int
-    + name : string
-    + biometric_data : string
-    + contact_info : string
-    + health_history : string
+enum "Media Enum" as MediaEnum {
+  IDENTIFYING
+  MEDICAL
+}
+enum "Attribute Enum" as AttributeEnum {
+  IDENTIFYING
+  MEDICAL
+  CONTACT 
+}
+enum "Value Enum" as ValueEnum {
+  STRING
+  INTEGER
+  FLOAT
+  etc.
+}
+enum "Treatment Enum" as TreatmentEnum {
+  SET_BONE
+  ANTIBIOTICS
+  etc.
+}
+enum "Urgency Enum" as UrgencyEnum {
+  VERY_HIGH
+  HIGH
+  MEDIUM
+  LOW
+}
+enum "Triage Result Enum" as TriageResultEnum {
+  ADMIT
+  OUTPATIENT
+  DISCHARGE
+}
+enum "Triage Type Enum" as TriageTypeEnum {
+  INJURY
+  FEVER
+  etc.
+}
+enum "Action Enum" as ActionEnum {
+  CONTINUE_TREATMENT
+  DISCHARGE
+  TRANSITION_TO_INPATIENT 
+  TRANSITION_TO_OUTPATIENT
+  ...This needs some more thought as if it's CONTINUE_TREATMENT the decision refers to a record
+}
+enum "Status Enum" as StatusEnum {
+  NONE
+  DISCHARGED
+  INPATIENT
+  OUTPATIENT
 }
 
-entity "Services" as Services {
-    + service_id : int
-    + type : string
+entity "Patient" as Patient {
+    + id : uuid
+    + status: StatusEnum
+    + created_at: datetime 
+    + updated_at: datetime 
+}
+entity "Patient Attribute" as PatientAttribute {
+    + id : uuid
+    + name : string
+    + value: string
+    + type: AttributeEnum 
+    + value_type: ValueEnum 
+    + created_at: datetime 
+    + updated_at: datetime 
+}
+entity "Patient Media" as PatientMedia {
+    + id : uuid
+    + location: string
+    + type: MediaEnum
+    + created_at: datetime 
+    + updated_at: datetime 
+}
+
+entity "Treatment" as Treatment{
+    + id : uuid 
+    + patient_id: uuid 
+    + type : TreatmentEnum 
     + description : string
+    + created_at: datetime 
+    + updated_at: datetime 
+}
+entity "Treatment Staff" as TreatmentStaff {
+    + treatment_id: uuid 
+    + staff_id: uuid 
+    + created_at: datetime 
+    + updated_at: datetime 
 }
 
 entity "Staff" as Staff {
-    + staff_id : int
+    + id: uuid
+    + human_id: string 
     + name : string
-    + qualifications : string
     + role : string
-}
-
-entity "Health Center" as HealthCenter {
-    + center_id : int
-    + location : string
-    + capacity : int
-    + operational_status : string
+    + created_at: datetime 
+    + updated_at: datetime 
 }
 
 entity "Visit" as Visit {
-    + visit_id : int
-    + patient_id : int
-    + date : date
-    + time : time
-    + services_provided : string
+    + id: uuid
+    + patient_id: uuid
+    + primary_staff_id: uuid 
+    + start_datetime : datetime
+    + end_datetime : datetime
+    + created_at: datetime 
+    + updated_at: datetime 
 }
-
-entity "Treatment" as Treatment {
-    + treatment_id : int
-    + description : string
-    + service_id : int
+entity "Visit Treatment" as VisitTreatment {
+    + id: uuid
+    + visit_id: uuid
+    + treatment_id: uuid
+    + created_at: datetime 
+    + updated_at: datetime 
 }
-
+entity "Outpatient Interaction" as OutpatientInteraction {
+    + id: uuid
+    + patient_id: uuid
+    + primary_staff_id: uuid 
+    + occurred: datetime
+    + created_at: datetime 
+    + updated_at: datetime 
+}
+entity "Outpatient Interaction Treatment" as OutpatientInteractionTreatment {
+    + id: uuid
+    + outpatient_interaction_id: uuid
+    + treatment_id: uuid
+    + created_at: datetime 
+    + updated_at: datetime 
+}
 entity "Triage" as Triage {
-    + triage_id : int
+    + id: uuid 
     + patient_id : int
-    + urgency_level : string
+    + primary_staff_id: uuid 
+    + triage_questionnaire_id: uuid 
+    + urgency_level : UrgencyEnum 
     + findings : string
+    + outcome: TriageResultEnum 
+    + triage_type: TriageTypeEnum 
+    + created_at: datetime 
+    + updated_at: datetime 
+}
+entity "Triage Questionnaire" as TriageQuestionnaire {
+    + id: uuid 
+    + type: TriageTypeEnum 
+    + created_at: datetime 
+    + updated_at: datetime 
+}
+entity "Questionnaire Question" as QuestionnaireQuestion {
+    + id: uuid 
+    + questionnaire_id: uuid 
+    + question: string 
+    + answer_type: ValueEnum
+    + created_at: datetime 
+    + updated_at: datetime 
+}
+entity "Questionnaire Answer" as QuestionnaireAnswer {
+    + id : uuid
+    + questionnaire_id: uuid
+    + questionnaire_question_id: uuid
+    + value: string
+    + value_type: ValueEnum 
+    + created_at: datetime 
+    + updated_at: datetime 
+}
+entity "Decision" as Decision {
+    + id: uuid 
+    + patient_id : int
+    + primary_staff_id: uuid 
+    + previous_action_type: ActionEnum
+    + previous_action_id: uuid | null
+    + next_action_type: ActionEnum
+    + next_action_id: uuid | null
+    + created_at: datetime 
+    + updated_at: datetime 
 }
 
+Patient ||--o{ PatientAttribute : "has many"
+Patient ||--o{ PatientMedia : "has many"
+Patient ||--o{ Treatment : "has many"
 Patient ||--o{ Visit : "has many"
-Visit ||--|{ Services : "requires one or many"
-Staff }|--o{ Visit : "conducts many"
-Visit ||--o{ Treatment : "receives many"
-Patient }o--|| Triage : "undergoes one"
-Services }|--o{ Treatment : "involves many"
-HealthCenter ||--o{ Visit : "hosts many"
+Patient ||--o{ OutpatientInteraction : "has many"
+Decision ||--|{ Patient: "relates to one"
+Decision ||--|{ Treatment: "may relate to one"
+
+Staff }|--o{ TreatmentStaff : "perform many"
+TreatmentStaff }--|| Treatment : "involve one"
+Staff ||--o{ Visit : "responsible for many"
+Staff ||--o{ OutpatientInteraction : "responsible for many"
+Staff ||--o{ Triage : "conducts many"
+Staff ||--o{ Decision : "involved in many"
+
+
+Visit ||--o{ VisitTreatment : "includes many"
+VisitTreatment ||--|{ Treatment : "involves one"
+OutpatientInteraction ||--o{ OutpatientInteractionTreatment : "includes many"
+OutpatientInteractionTreatment ||--|{ Treatment : "involves one"
+Triage ||--|{ Patient : "assesses one"
+Triage ||--|{ TriageQuestionnaire: "uses one"
+TriageQuestionnaire ||--o{ QuestionnaireQuestion : "has many"
+TriageQuestionnaire ||--o{ QuestionnaireAnswer: "has many"
+QuestionnaireAnswer ||--|{ QuestionnaireQuestion : "answers one"
 
 @enduml
