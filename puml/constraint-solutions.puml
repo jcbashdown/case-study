@@ -15,14 +15,14 @@ together {
       component "Last sync"
       component "Sync error message with suggested action"
     }
-  }
-  note bottom of Dashboard 
-    Gets the latest data on first load
-    Syncs in the background periodically
-    Displays the last data and sync time
-    Indicates when sync is consistently failing
-    Optional auth to see this dashboard
+  note as N
+    - Gets the latest data on first load
+    - Syncs in the background periodically
+    - Displays the last data and sync time
+    - Indicates when sync is consistently failing
+    - Optional auth to see this dashboard
   end note
+  }
 }
 together {
   package LAN {
@@ -31,8 +31,9 @@ together {
       component "WiFi Boosters" as WiFiBoosters
     }
     package "Local Server" as LocalServer {
-      component "App Server"
-      component Database
+      component Database as DB
+      component "PWA App Server" as PWAServer
+      component "API Server" as API
     }
     package MobileDevice {
       component "Mobile Dashboard" as MobileDashboard {
@@ -45,7 +46,7 @@ together {
 
       }
     }
-    note left of LocalServer
+    note right of LocalServer
       - Hosts server application and database
       - Connects to mobile devices via local WiFi
       - Supports real-time data sharing
@@ -72,12 +73,12 @@ component "Patient Management Progressive Web App" as PWA {
     }
   }
   note top of Implementation 
-            Likely a cached SPA with client routing.
-            Any browser supporting service workers should also support this.
-            Pages should be as simple as possible - largely static - 
-            to not require significant CPU or memory resources on the device.
-            Strict client side validation should be implemented.
-            All data should be written to a local db such as RxDB and synced when possible.
+            - Likely a cached SPA with client routing.
+            - Any browser supporting service workers should also support this.
+            - Pages should be as simple as possible - largely static - 
+            ...to not require significant CPU or memory resources on the device.
+            - Strict client side validation should be implemented.
+            - All data should be written to a local db such as RxDB and synced when possible.
   end note
 }
 
@@ -89,12 +90,14 @@ DashboardDisplay <--> Network: Syncs through network
 
 Implementation -[hidden]up-> Functionality
 
-FSDashboard -down-> Dashboard
-MobileDashboard -down-> Dashboard
-InstalledPWA -up-> PWA
+FSDashboard -right-> Dashboard
+MobileDashboard -right-> Dashboard
+InstalledPWA -left-> PWA
 
 UI <-> OnDeviceDB 
 OnDeviceDB <-> SyncingSystem
 
+PWAServer <-right-> DB 
+API <-left-> DB 
 
 @enduml
